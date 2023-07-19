@@ -50,7 +50,7 @@ const PDFtoExcelConverter = () => {
       // Create a hidden link element
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = 'document.pdf';
+      link.download = "testing.pdf";
       link.style.display = 'none';
       document.body.appendChild(link);
 
