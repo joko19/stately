@@ -43,15 +43,15 @@ const PDFtoExcelConverter = () => {
     multiple: true,
   });
 
-   const handleDownload = () => {
+  const handleDownload = () => {
     if (files) {
       const downloadUrl = URL.createObjectURL(files);
 
       // Create a hidden link element
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = "testing.pdf";
-      link.style.display = 'none';
+      link.style.display = "none";
       document.body.appendChild(link);
 
       // Programmatically trigger the download
@@ -62,6 +62,7 @@ const PDFtoExcelConverter = () => {
       URL.revokeObjectURL(downloadUrl);
     }
   };
+  console.log(bankSelected ? false : true);
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
       <div className="flex items-center gap-4">
@@ -70,6 +71,7 @@ const PDFtoExcelConverter = () => {
           <select
             className="cursor-pointer block appearance-none px-4 py-2 pr-8 leading-tight bg-white border border-[#9AA8B8] rounded shadow focus:outline-none focus:shadow-outline text-[#697584]"
             id="select-input"
+            onChange={(e) => setBankSelected(e.target.value)}
           >
             <option value="">Pilih Bank</option>
             {bankOptions.map((bank) => (
@@ -87,15 +89,29 @@ const PDFtoExcelConverter = () => {
 
       {!files && !isSubmitting && (
         <div className="bg-[#EBF0F8] rounded-lg mt-4 p-8 sm:p-20 text-center">
-          <div
-            {...getRootProps()}
-            className={`flex justify-center rounded-md p-4 `}
-          >
-            <input {...getInputProps()} />
-            <p className="bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer">
-              {isDragActive ? "Drop the PDF files here" : "Upload file disini"}
-            </p>
-          </div>
+          {bankSelected ? (
+            <div
+              {...getRootProps()}
+              className={`flex justify-center rounded-md p-4 `}
+            >
+              <input {...getInputProps()} />
+              <p
+                className={
+                  "bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer"
+                }
+              >
+                {isDragActive
+                  ? "Drop the PDF files here"
+                  : "Upload file disini"}
+              </p>
+            </div>
+          ) : (
+            <div className={`flex justify-center rounded-md p-4 `}>
+              <p className="bg-blue-300 text-white text-lg font-bold text-center py-4 px-8 rounded-lg">
+              Upload file disini
+              </p>
+            </div>
+          )}
           <span className="text-[#697584] text-center w-full">
             Max file size is 10 MB per upload
           </span>
