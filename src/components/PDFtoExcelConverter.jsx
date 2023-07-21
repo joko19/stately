@@ -43,8 +43,7 @@ const PDFtoExcelConverter = () => {
 
       const startTime = Date.now();
       const apiKey = "stag_7qcj9QPJDV59N9KC2myR";
-
-      const response = await axios
+      await axios
         .post(
           "https://staging-api.fintelite.id/v1/business/categorization/ocr",
           formData,
@@ -66,16 +65,15 @@ const PDFtoExcelConverter = () => {
             },
           }
         )
-        console.log(response)
-        // .then((response) => {
-        //   console.log(response)
-        //   setOutput(response.data.data)
-        //   setIsSubmitting(false)
-        // })
-        // .catch((error) => {
-        //   console.log(error);
-        //   // Handle the error
-        // });
+        .then((response) => {
+          console.log(response)
+          setOutput(response.data.data)
+          setIsSubmitting(false)
+        })
+        .catch((error) => {
+          console.log(error);
+          // Handle the error
+        });
     } catch (error) {
       console.error("Error submitting data:", error);
     }
