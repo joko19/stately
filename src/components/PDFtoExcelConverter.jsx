@@ -3,7 +3,8 @@ import { AiOutlineDown } from "react-icons/ai";
 import { useDropzone } from "react-dropzone";
 import { bankOptions } from "./const";
 import axios from "axios";
-import { convertToExcel } from "./converter";
+import Loader from "./Loader";
+import Download from "./Download";
 
 const PDFtoExcelConverter = () => {
   const [bankSelected, setBankSelected] = useState();
@@ -11,27 +12,27 @@ const PDFtoExcelConverter = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState(null);
-  const [output, setOutput] = useState()
-  const [errorMessage, setErrorMessage] = useState('');
+  const [output, setOutput] = useState();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onDrop = async (acceptedFiles) => {
-    const allowedTypes = ['application/pdf'];
+    const allowedTypes = ["application/pdf"];
     const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
 
     if (acceptedFiles[0].size > maxSizeInBytes) {
-      setErrorMessage('Max file size is 10 MB per upload');
+      setErrorMessage("Max file size is 10 MB per upload");
       setFiles(null);
       return;
     }
 
     if (!allowedTypes.includes(acceptedFiles[0].type)) {
-      setErrorMessage('Invalid file type. Please select a PDF file.');
+      setErrorMessage("Invalid file type. Please select a PDF file.");
       setFiles(null);
       return;
     }
 
     setIsSubmitting(true);
-    setErrorMessage('');
+    setErrorMessage("");
     setFiles(acceptedFiles[0]);
 
     // submit to server
@@ -54,21 +55,21 @@ const PDFtoExcelConverter = () => {
               "external-id": "dev-stately",
             },
             onUploadProgress: (progressEvent) => {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              const progress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
               setProgress(progress);
-    
+
               const currentTime = Date.now();
               const elapsedTime = currentTime - startTime;
               const remainingTime = ((100 - progress) / progress) * elapsedTime;
-    
               setEstimatedTime(remainingTime);
             },
           }
         )
         .then((response) => {
-          console.log(response)
-          setOutput(response.data.data)
-          setIsSubmitting(false)
+          setOutput(response.data.data);
+          setIsSubmitting(false);
         })
         .catch((error) => {
           console.log(error);
@@ -83,10 +84,6 @@ const PDFtoExcelConverter = () => {
     accept: ".pdf",
     multiple: true,
   });
-
-  const handleDownload = () => {
-    convertToExcel(output)
-  };
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
@@ -138,58 +135,20 @@ const PDFtoExcelConverter = () => {
             </div>
           )}
           <span className="text-[#697584] text-center w-full">
-          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+            {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
           </span>
         </div>
       )}
 
-      {isSubmitting && (
-        <div className="bg-[#EBF0F8] rounded-lg mt-4 p-8 sm:p-20 text-center">
-          <span className="text-[#697584] text-center w-full">
-            Memproses File:
-          </span>
-          <p className="font-bold text-lg">{files?.name}</p>
-          <div className="bg-[#CAECE6] h-8 w-full rounded mt-4">
-            <div
-              className="bg-[#32D07B] h-full rounded"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-
-          {estimatedTime !== null && (
-        <p>Estimated Time Remaining: {Math.ceil(estimatedTime / 1000)} seconds</p>
-      )}
-
-          {progress === 100 && (
-            <div className="text-center mt-2 text-green-500">
-              Upload complete!
-            </div>
-          )}
-        </div>
-      )}
+      <Loader
+        isSubmitting={isSubmitting}
+        progress={progress}
+        estimatedTime={estimatedTime}
+        fileName={files?.name}
+      />
 
       {files && !isSubmitting && (
-        <div className="bg-[#EBF0F8] rounded-lg mt-4 p-8 sm:p-8 text-center">
-          <p className="font-bold max-w-xl mx-auto">
-            Dokumen kamu sudah selesai diproses! <br /> Klik tombol di bawah ini
-            untuk mengunduh dokumennya.
-          </p>
-          <div
-            className={`flex justify-center rounded-md p-4 mb-8`}
-            onClick={handleDownload}
-          >
-            <p className="flex items-center gap-4 bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer">
-              <img src="/asset/icon/Download.svg" alt="download" width={20} />
-              Download EXCEL
-            </p>
-          </div>
-          <span
-            className="text-[#32D07B] text-center w-full font-medium cursor-pointer mt-8"
-            onClick={() => setFiles(null)}
-          >
-            Perlu mengunggah dokumen lain?
-          </span>
-        </div>
+        <Download output={output} onReset={() => setFiles(null)} />
       )}
     </section>
   );
