@@ -2,41 +2,84 @@ import React, { useState } from "react";
 import { AiOutlineDown } from "react-icons/ai";
 import { useDropzone } from "react-dropzone";
 import { bankOptions } from "./const";
+import axios from "axios";
+import { convertToExcel } from "./converter";
 
 const PDFtoExcelConverter = () => {
   const [bankSelected, setBankSelected] = useState();
   const [files, setFiles] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState(null);
+  const [output, setOutput] = useState()
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const onDrop = (acceptedFiles) => {
+  const onDrop = async (acceptedFiles) => {
+    const allowedTypes = ['application/pdf'];
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
+
+    if (acceptedFiles[0].size > maxSizeInBytes) {
+      setErrorMessage('Max file size is 10 MB per upload');
+      setFiles(null);
+      return;
+    }
+
+    if (!allowedTypes.includes(acceptedFiles[0].type)) {
+      setErrorMessage('Invalid file type. Please select a PDF file.');
+      setFiles(null);
+      return;
+    }
+
     setIsSubmitting(true);
-    console.log(acceptedFiles[0]);
+    setErrorMessage('');
     setFiles(acceptedFiles[0]);
 
-    const fileSize = acceptedFiles[0].size;
+    // submit to server
+    try {
+      const formData = new FormData();
+      formData.append("file", acceptedFiles[0]);
+      formData.append("document_type", "INVOICE");
+      formData.append("external_id", "dev-stately");
 
-    const updateProgress = (percentage) => {
-      setProgress(percentage);
-    };
+      const startTime = Date.now();
+      const apiKey = "stag_7qcj9QPJDV59N9KC2myR";
 
-    // Simulating file upload progress
-    const simulateUploadProgress = () => {
-      let currentProgress = 0;
-      const interval = setInterval(() => {
-        currentProgress += 10;
-        updateProgress(currentProgress);
-
-        if (currentProgress >= 100) {
-          clearInterval(interval);
-          setIsSubmitting(false);
-        }
-      }, 500);
-    };
-
-    simulateUploadProgress();
+      const response = await axios
+        .post(
+          "https://staging-api.fintelite.id/v1/business/categorization/ocr",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "api-key": `${apiKey}`,
+              "external-id": "dev-stately",
+            },
+            onUploadProgress: (progressEvent) => {
+              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setProgress(progress);
+    
+              const currentTime = Date.now();
+              const elapsedTime = currentTime - startTime;
+              const remainingTime = ((100 - progress) / progress) * elapsedTime;
+    
+              setEstimatedTime(remainingTime);
+            },
+          }
+        )
+        console.log(response)
+        // .then((response) => {
+        //   console.log(response)
+        //   setOutput(response.data.data)
+        //   setIsSubmitting(false)
+        // })
+        // .catch((error) => {
+        //   console.log(error);
+        //   // Handle the error
+        // });
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
   };
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ".pdf",
@@ -44,25 +87,9 @@ const PDFtoExcelConverter = () => {
   });
 
   const handleDownload = () => {
-    if (files) {
-      const downloadUrl = URL.createObjectURL(files);
-
-      // Create a hidden link element
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = "testing.pdf";
-      link.style.display = "none";
-      document.body.appendChild(link);
-
-      // Programmatically trigger the download
-      link.click();
-
-      // Clean up
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
-    }
+    convertToExcel(output)
   };
-  console.log(bankSelected ? false : true);
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
       <div className="flex items-center gap-4">
@@ -94,7 +121,7 @@ const PDFtoExcelConverter = () => {
               {...getRootProps()}
               className={`flex justify-center rounded-md p-4 `}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps()} type="file" accept=".pdf" />
               <p
                 className={
                   "bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer"
@@ -108,12 +135,12 @@ const PDFtoExcelConverter = () => {
           ) : (
             <div className={`flex justify-center rounded-md p-4 `}>
               <p className="bg-blue-300 text-white text-lg font-bold text-center py-4 px-8 rounded-lg">
-              Upload file disini
+                Upload file disini
               </p>
             </div>
           )}
           <span className="text-[#697584] text-center w-full">
-            Max file size is 10 MB per upload
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
           </span>
         </div>
       )}
@@ -131,9 +158,9 @@ const PDFtoExcelConverter = () => {
             ></div>
           </div>
 
-          {progress > 0 && progress < 100 && (
-            <div className="text-center mt-2">Uploading: {progress}%</div>
-          )}
+          {estimatedTime !== null && (
+        <p>Estimated Time Remaining: {Math.ceil(estimatedTime / 1000)} seconds</p>
+      )}
 
           {progress === 100 && (
             <div className="text-center mt-2 text-green-500">
