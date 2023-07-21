@@ -148,7 +148,7 @@ const PDFtoExcelConverter = () => {
       />
 
       {files && !isSubmitting && (
-        <Download output={output} onReset={() => setFiles(null)} />
+        <Download output={output} onReset={() => setFiles(null)} filename={files?.name}/>
       )}
     </section>
   );

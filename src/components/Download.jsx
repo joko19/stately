@@ -1,9 +1,9 @@
 import React from "react";
 import { convertToExcel } from "./converter";
 
-const Download = ({ output, onReset }) => {
+const Download = ({ output, filename, onReset }) => {
   const handleDownload = () => {
-    convertToExcel(output);
+    convertToExcel(output, filename);
   };
 
   return (

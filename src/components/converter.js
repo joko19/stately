@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 
-export const convertToExcel = (data) => {
+export const convertToExcel = (data, filename) => {
   if (!data) {
     console.error("JSON data is undefined or null.");
     return;
@@ -40,7 +40,7 @@ export const convertToExcel = (data) => {
   // Create a link to download the Excel file
   const a = document.createElement("a");
   a.href = url;
-  a.download = "data.xlsx";
+  a.download = `${filename}.xlsx`;
   a.click();
 
   // Clean up the URL and remove the link element
