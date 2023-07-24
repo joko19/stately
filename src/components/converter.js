@@ -11,11 +11,17 @@ export const convertToExcel = (data, filename) => {
   // Process the dynamic JSON data
   Object.keys(data).forEach((sheetName) => {
     const sheetData = data[sheetName];
+    let updatedJsonData;
+    if (sheetName === "item_line") {
+      updatedJsonData = changeItemNameToLineItems(sheetData);
+    } else {
+      updatedJsonData = sheetData;
+    }
 
     // Make sure the sheetData is an array before proceeding
-    if (Array.isArray(sheetData)) {
-      const worksheet = XLSX.utils.json_to_sheet(sheetData, {
-        header: Object.keys(sheetData[0]),
+    if (Array.isArray(updatedJsonData)) {
+      const worksheet = XLSX.utils.json_to_sheet(updatedJsonData, {
+        header: Object.keys(updatedJsonData[0]),
       });
 
       // Add the worksheet to the workbook with the sheet name
@@ -46,3 +52,11 @@ export const convertToExcel = (data, filename) => {
   // Clean up the URL and remove the link element
   URL.revokeObjectURL(url);
 };
+
+function changeItemNameToLineItems(data) {
+  return data.map((item) => {
+    item.line_items = item.item_name;
+    delete item.item_name;
+    return item;
+  });
+}

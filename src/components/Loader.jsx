@@ -18,13 +18,13 @@ const Loader = ({ isSubmitting, fileName, progress, estimatedTime }) => {
         ></div>
       </div>
 
-      {progress !== 100 ? (
+      {estimatedTime !== 0 ? (
         <p className="text-gray-600 mt-2">
-          Upload process: {Math.ceil(estimatedTime / 1000)} seconds
+          Perkiraan Waktu Selesai: {Math.ceil(estimatedTime / 1000)} detik
         </p>
       ) : (
         <div className="text-center mt-2 text-green-500">
-          Convert processing on server
+          Please wait
         </div>
       )}
     </div>

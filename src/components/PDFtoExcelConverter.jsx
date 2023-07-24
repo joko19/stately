@@ -1,13 +1,10 @@
 import React, { useState } from "react";
-import { AiOutlineDown } from "react-icons/ai";
 import { useDropzone } from "react-dropzone";
-import { bankOptions } from "./const";
 import axios from "axios";
 import Loader from "./Loader";
 import Download from "./Download";
 
 const PDFtoExcelConverter = () => {
-  const [bankSelected, setBankSelected] = useState();
   const [files, setFiles] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -65,11 +62,37 @@ const PDFtoExcelConverter = () => {
               const remainingTime = ((100 - progress) / progress) * elapsedTime;
               setEstimatedTime(remainingTime);
             },
+            // onUploadProgress: (progressEvent) => {
+            //   const percentCompleted = Math.round(
+            //     (progressEvent.loaded * 100) / progressEvent.total
+            //   );
+            //   setProgress(percentCompleted);
+
+            //   // Calculate remaining time estimation for upload
+            //   const remainingBytes = progressEvent.total - progressEvent.loaded;
+            //   const bytesPerSecond =
+            //     progressEvent.loaded / (Date.now() - progressEvent.timeStamp);
+            //   const remainingTimeInSeconds = remainingBytes / bytesPerSecond;
+            //   setEstimatedTime(remainingTimeInSeconds);
+            // },
           }
         )
         .then((response) => {
-          setOutput(response.data.data);
-          setIsSubmitting(false);
+          // setOutput(response.data.data);
+          // setIsSubmitting(false);
+          // Handle successful file upload response
+          setIsSubmitting(true); // Show the loading spinner
+          // setResponseTime(null);
+          const endTime = Date.now(); // End time for measuring response time
+          const responseTimeInSeconds = (endTime - startTime) / 1000;
+          setEstimatedTime(responseTimeInSeconds);
+
+          setTimeout(() => {
+            setOutput(response.data.data);
+            setIsSubmitting(false); // Hide the loading spinner after a simulated delay
+            // console.log("Upload success:", response.data);
+            // Add any further actions you want to take after successful upload and response
+          }, 2000); // Simulated delay of 2 seconds
         })
         .catch((error) => {
           console.log(error);
@@ -78,7 +101,15 @@ const PDFtoExcelConverter = () => {
     } catch (error) {
       console.error("Error submitting data:", error);
     }
+
+    // Set a timeout to estimate response time
+    setTimeout(() => {
+      if (!estimatedTime) {
+        setEstimatedTime(null); // Reset responseTime when the response is still not ready
+      }
+    }, 5000); // Wait for 5 seconds before assuming the response is not ready
   };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ".pdf",
@@ -96,14 +127,16 @@ const PDFtoExcelConverter = () => {
             <input {...getInputProps()} type="file" accept=".pdf" />
             <p
               className={
-                "bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer"
+                "bg-primary hover:bg-blue-500 text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer"
               }
             >
               {isDragActive ? "Drop the PDF files here" : "Upload file disini"}
             </p>
           </div>
           <span className="text-[#697584] text-center w-full">
-          <p style={{ color: "#697584" }}>Max file size is 10 MB per upload</p>
+            <p style={{ color: "#697584" }}>
+              Max file size is 10 MB per upload
+            </p>
             {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
           </span>
         </div>
