@@ -9,7 +9,7 @@ const Header = () => {
       <p className="mt-2">
         Mencatat pengeluaran dan pemasukan merupakan hal yang memakan waktu,
         apalagi dengan laporan bank yang perlu banyak disortir, dianalisa, dan
-        diketik. Tenang, kami akan membantu anda memudahkan proses ini! Hanya
+        diketik. <br/> Tenang, kami akan membantu anda memudahkan proses ini! <br/> Hanya
         dengan mengunggah laporan bank (estatement) kamu dalam format{" "}
         <b> PDF</b>, kamu akan dengan mudah mendapatkan laporan kamu dengan
         bentuk <b> EXCEL.</b>

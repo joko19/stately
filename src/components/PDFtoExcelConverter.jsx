@@ -87,54 +87,23 @@ const PDFtoExcelConverter = () => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-      <div className="flex items-center gap-4">
-        Pertama, pilih bank kamu{" "}
-        <div className="relative inline-block">
-          <select
-            className="cursor-pointer block appearance-none px-4 py-2 pr-8 leading-tight bg-white border border-[#9AA8B8] rounded shadow focus:outline-none focus:shadow-outline text-[#697584]"
-            id="select-input"
-            onChange={(e) => setBankSelected(e.target.value)}
-          >
-            <option value="">Pilih Bank</option>
-            {bankOptions.map((bank) => (
-              <option value={bank}>{bank}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-            <AiOutlineDown className="text-[#697584]" size={12} />
-          </div>
-        </div>
-        <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded text-sm">
-          OK
-        </button>
-      </div>
-
       {!files && !isSubmitting && (
         <div className="bg-[#EBF0F8] rounded-lg mt-4 p-8 sm:p-20 text-center">
-          {bankSelected ? (
-            <div
-              {...getRootProps()}
-              className={`flex justify-center rounded-md p-4 `}
+          <div
+            {...getRootProps()}
+            className={`flex justify-center rounded-md p-4 `}
+          >
+            <input {...getInputProps()} type="file" accept=".pdf" />
+            <p
+              className={
+                "bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer"
+              }
             >
-              <input {...getInputProps()} type="file" accept=".pdf" />
-              <p
-                className={
-                  "bg-primary text-white text-lg font-bold text-center py-4 px-8 rounded-lg cursor-pointer"
-                }
-              >
-                {isDragActive
-                  ? "Drop the PDF files here"
-                  : "Upload file disini"}
-              </p>
-            </div>
-          ) : (
-            <div className={`flex justify-center rounded-md p-4 `}>
-              <p className="bg-blue-300 text-white text-lg font-bold text-center py-4 px-8 rounded-lg">
-                Upload file disini
-              </p>
-            </div>
-          )}
+              {isDragActive ? "Drop the PDF files here" : "Upload file disini"}
+            </p>
+          </div>
           <span className="text-[#697584] text-center w-full">
+          <p style={{ color: "#697584" }}>Max file size is 10 MB per upload</p>
             {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
           </span>
         </div>
@@ -148,7 +117,11 @@ const PDFtoExcelConverter = () => {
       />
 
       {files && !isSubmitting && (
-        <Download output={output} onReset={() => setFiles(null)} filename={files?.name}/>
+        <Download
+          output={output}
+          onReset={() => setFiles(null)}
+          filename={files?.name}
+        />
       )}
     </section>
   );
